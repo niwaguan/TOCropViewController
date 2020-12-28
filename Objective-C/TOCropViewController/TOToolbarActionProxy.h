@@ -18,15 +18,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// selector for tap down button
 @property (nonatomic, readonly) SEL donwSelector;
-/// selector for tap down button
+/// selector for tap cancel button
 @property (nonatomic, readonly) SEL cancelSelector;
-/// selector for tap down button
+/// selector for tap reset cropview button
 @property (nonatomic, readonly) SEL resetCropViewLayoutSelector;
-/// selector for tap down button
+/// selector for tap show aspect ratio dialog button
 @property (nonatomic, readonly) SEL showAspectRatioDialogSelector;
-/// selector for tap down button
+/// selector for tap rotate cropview counterclockwise button
 @property (nonatomic, readonly) SEL rotateCropViewCounterclockwiseSelector;
-/// selector for tap down button
+/// selector for tap rotate cropview clockwise button
 @property (nonatomic, readonly) SEL rotateCropViewClockwiseSelector;
 
 @end

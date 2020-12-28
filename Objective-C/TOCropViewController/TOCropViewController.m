@@ -358,6 +358,12 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
 - (void)adjustCropViewInsets
 {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(cropViewInsetsForCropViewController:)]) {
+        UIEdgeInsets insets = [self.delegate cropViewInsetsForCropViewController:self];
+        self.cropView.cropRegionInsets = insets;
+        return;
+    }
+    
     UIEdgeInsets insets = self.statusBarSafeInsets;
 
     // If there is no title text, inset the top of the content as high as possible
@@ -376,11 +382,6 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
         return;
     }
-
-    // Work out the size of the title label based on the crop view size
-    CGRect frame = self.titleLabel.frame;
-    frame.size = [self.titleLabel sizeThatFits:self.cropView.frame.size];
-    self.titleLabel.frame = frame;
 
     // Set out the appropriate inset for that
     CGFloat verticalInset = self.statusBarHeight;
@@ -420,11 +421,19 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     [self.toolbar setNeedsLayout];
 }
 
+- (void)adjustTitleLabelFrame {
+    // Work out the size of the title label based on the crop view size
+    CGRect frame = self.titleLabel.frame;
+    frame.size = [self.titleLabel sizeThatFits:self.cropView.frame.size];
+    self.titleLabel.frame = frame;
+}
+
 - (void)viewSafeAreaInsetsDidChange
 {
     [super viewSafeAreaInsetsDidChange];
     [self adjustCropViewInsets];
     [self adjustToolbarInsets];
+    [self adjustTitleLabelFrame];
 }
 
 - (void)viewDidLayoutSubviews
@@ -433,6 +442,7 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
     self.cropView.frame = [self frameForCropViewWithVerticalLayout:self.verticalLayout];
     [self adjustCropViewInsets];
+    [self adjustTitleLabelFrame];
     [self.cropView moveCroppedContentToCenterAnimated:NO];
 
     if (self.firstTime == NO) {

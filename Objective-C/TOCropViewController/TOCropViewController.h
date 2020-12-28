@@ -36,10 +36,17 @@
 @protocol TOCropViewControllerDelegate <NSObject>
 @optional
 
+
+/// add custom toolbar
+/// @param proxy toolbar action proxy
 - (void)installToolbarFroCropViewController:(nonnull TOCropViewController *)cropViewController
                            usingActionProxy:(nonnull TOToolbarActionProxy *)proxy;
 
+/// config cropview's frame
 - (CGRect)cropViewFrameForCropViewController:(nonnull TOCropViewController *)cropViewController;
+
+/// config cropview's insets
+- (UIEdgeInsets)cropViewInsetsForCropViewController:(nonnull TOCropViewController *)cropViewController;
 
 /**
  Called when the user has committed the crop action, and provides 

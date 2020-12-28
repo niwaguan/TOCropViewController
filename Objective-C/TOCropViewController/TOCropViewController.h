@@ -25,6 +25,7 @@
 #import "TOCropViewConstants.h"
 #import "TOCropView.h"
 #import "TOCropToolbar.h"
+#import "TOToolbarActionProxy.h"
 
 @class TOCropViewController;
 
@@ -34,6 +35,11 @@
 
 @protocol TOCropViewControllerDelegate <NSObject>
 @optional
+
+- (void)installToolbarFroCropViewController:(nonnull TOCropViewController *)cropViewController
+                           usingActionProxy:(nonnull TOToolbarActionProxy *)proxy;
+
+- (CGRect)cropViewFrameForCropViewController:(nonnull TOCropViewController *)cropViewController;
 
 /**
  Called when the user has committed the crop action, and provides 

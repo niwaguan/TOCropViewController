@@ -129,6 +129,8 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     self.toolbar.clampButtonTapped = ^{ [weakSelf showAspectRatioDialog]; };
     self.toolbar.rotateCounterclockwiseButtonTapped = ^{ [weakSelf rotateCropViewCounterclockwise]; };
     self.toolbar.rotateClockwiseButtonTapped        = ^{ [weakSelf rotateCropViewClockwise]; };
+    
+    [self installCustomToolbarIfNeeds];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -228,6 +230,15 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     [self setNeedsStatusBarAppearanceUpdate];
 }
 
+#pragma mark - Custom toolbar -
+
+- (void)installCustomToolbarIfNeeds {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(installToolbarFroCropViewController:usingActionProxy:)]) {
+        TOToolbarActionProxy *proxy = [TOToolbarActionProxy proxyWithTarget:self];
+        [self.delegate installToolbarFroCropViewController:self usingActionProxy:proxy];
+    }
+}
+
 #pragma mark - Status Bar -
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
@@ -263,24 +274,17 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 - (CGRect)frameForToolbarWithVerticalLayout:(BOOL)verticalLayout
 {
     UIEdgeInsets insets = self.statusBarSafeInsets;
-
+    
     CGRect frame = CGRectZero;
-    if (!verticalLayout) { // In landscape laying out toolbar to the left
-        frame.origin.x = insets.left;
-        frame.origin.y = 0.0f;
-        frame.size.width = kTOCropViewControllerToolbarHeight;
-        frame.size.height = CGRectGetHeight(self.view.frame);
-    }
-    else {
-        frame.origin.x = 0.0f;
-        frame.size.width = CGRectGetWidth(self.view.bounds);
-        frame.size.height = kTOCropViewControllerToolbarHeight;
-
-        if (self.toolbarPosition == TOCropViewControllerToolbarPositionBottom) {
-            frame.origin.y = CGRectGetHeight(self.view.bounds) - (frame.size.height + insets.bottom);
-        } else {
-            frame.origin.y = insets.top;
-        }
+    
+    frame.origin.x = insets.left;
+    frame.size.width = CGRectGetWidth(self.view.bounds) - insets.left - insets.right;
+    frame.size.height = kTOCropViewControllerToolbarHeight;
+    
+    if (self.toolbarPosition == TOCropViewControllerToolbarPositionBottom) {
+        frame.origin.y = CGRectGetHeight(self.view.bounds) - (frame.size.height + insets.bottom);
+    } else {
+        frame.origin.y = insets.top;
     }
     
     return frame;
@@ -288,6 +292,9 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
 
 - (CGRect)frameForCropViewWithVerticalLayout:(BOOL)verticalLayout
 {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(cropViewFrameForCropViewController:)]) {
+        return [self.delegate cropViewFrameForCropViewController:self];
+    }
     //On an iPad, if being presented in a modal view controller by a UINavigationController,
     //at the time we need it, the size of our view will be incorrect.
     //If this is the case, derive our view size from our parent view controller instead
@@ -298,29 +305,21 @@ static const CGFloat kTOCropViewControllerToolbarHeight = 44.0f;
     else {
         view = self.parentViewController.view;
     }
-
+    
     UIEdgeInsets insets = self.statusBarSafeInsets;
-
+    
     CGRect bounds = view.bounds;
     CGRect frame = CGRectZero;
-
-    // Horizontal layout (eg landscape)
-    if (!verticalLayout) {
-        frame.origin.x = kTOCropViewControllerToolbarHeight + insets.left;
-        frame.size.width = CGRectGetWidth(bounds) - frame.origin.x;
-		frame.size.height = CGRectGetHeight(bounds);
-    }
-    else { // Vertical layout
-        frame.size.height = CGRectGetHeight(bounds);
-        frame.size.width = CGRectGetWidth(bounds);
-
-        // Set Y and adjust for height
-        if (self.toolbarPosition == TOCropViewControllerToolbarPositionBottom) {
-            frame.size.height -= (insets.bottom + kTOCropViewControllerToolbarHeight);
-        } else if (self.toolbarPosition == TOCropViewControllerToolbarPositionTop) {
-			frame.origin.y = kTOCropViewControllerToolbarHeight + insets.top;
-            frame.size.height -= frame.origin.y;
-        }
+    
+    frame.size.height = CGRectGetHeight(bounds);
+    frame.size.width = CGRectGetWidth(bounds);
+    
+    // Set Y and adjust for height
+    if (self.toolbarPosition == TOCropViewControllerToolbarPositionBottom) {
+        frame.size.height -= (insets.bottom + kTOCropViewControllerToolbarHeight);
+    } else if (self.toolbarPosition == TOCropViewControllerToolbarPositionTop) {
+        frame.origin.y = kTOCropViewControllerToolbarHeight + insets.top;
+        frame.size.height -= frame.origin.y;
     }
     
     return frame;
